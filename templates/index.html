@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Performance Feedback Generator</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+
+            <h1>🤖 AI Performance Feedback Generator</h1>
+
+            <p>
+                Generate personalized AI-based performance feedback
+            </p>
+
+        </div>
+
+
+        <!-- INPUT CARD -->
+        <div class="card">
+
+            <h2>Student Performance</h2>
+
+            <label for="name">
+                Student Name
+            </label>
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter student name"
+            >
+
+
+            <h3>Enter Subject Marks</h3>
+
+
+            <div class="subject">
+
+                <label for="python">
+                    Python
+                </label>
+
+                <input
+                    type="number"
+                    id="python"
+                    min="0"
+                    max="100"
+                    placeholder="Enter marks"
+                >
+
+            </div>
+
+
+            <div class="subject">
+
+                <label for="ml">
+                    Machine Learning
+                </label>
+
+                <input
+                    type="number"
+                    id="ml"
+                    min="0"
+                    max="100"
+                    placeholder="Enter marks"
+                >
+
+            </div>
+
+
+            <div class="subject">
+
+                <label for="nlp">
+                    NLP
+                </label>
+
+                <input
+                    type="number"
+                    id="nlp"
+                    min="0"
+                    max="100"
+                    placeholder="Enter marks"
+                >
+
+            </div>
+
+
+            <div class="subject">
+
+                <label for="data_science">
+                    Data Science
+                </label>
+
+                <input
+                    type="number"
+                    id="data_science"
+                    min="0"
+                    max="100"
+                    placeholder="Enter marks"
+                >
+
+            </div>
+
+
+            <button onclick="generateFeedback()">
+                🤖 Generate AI Feedback
+            </button>
+
+
+            <p id="error"></p>
+
+        </div>
+
+
+        <!-- RESULT CARD -->
+        <div
+            class="result-card"
+            id="resultCard"
+            style="display: none;"
+        >
+
+            <h2>📊 AI Performance Report</h2>
+
+
+            <!-- AVERAGE -->
+            <div class="average">
+
+                <span>
+                    Average Score
+                </span>
+
+                <strong id="average">
+                    -
+                </strong>
+
+            </div>
+
+
+            <!-- PERFORMANCE -->
+            <div class="performance">
+
+                <span>
+                    Performance Level
+                </span>
+
+                <strong id="performance">
+                    -
+                </strong>
+
+            </div>
+
+
+            <!-- SENTIMENT -->
+            <div class="performance">
+
+                <span>
+                    Feedback Sentiment
+                </span>
+
+                <strong id="sentiment">
+                    -
+                </strong>
+
+            </div>
+
+
+            <!-- FEEDBACK -->
+            <h3>
+                💬 Personalized Feedback
+            </h3>
+
+            <p id="feedback">
+                -
+            </p>
+
+
+            <!-- STRENGTHS -->
+            <h3>
+                💪 Strengths
+            </h3>
+
+            <ul id="strengths">
+            </ul>
+
+
+            <!-- IMPROVEMENTS -->
+            <h3>
+                📚 Areas for Improvement
+            </h3>
+
+            <ul id="improvements">
+            </ul>
+
+
+            <!-- RECOMMENDATIONS -->
+            <h3>
+                🎯 Recommendations
+            </h3>
+
+            <ul id="recommendations">
+            </ul>
+
+
+            <!-- DOWNLOAD -->
+            <button
+                onclick="downloadFeedback()"
+            >
+                📥 Download Feedback
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        async function generateFeedback() {
+
+            const name =
+                document
+                .getElementById("name")
+                .value
+                .trim();
+
+
+            const python =
+                document
+                .getElementById("python")
+                .value;
+
+
+            const ml =
+                document
+                .getElementById("ml")
+                .value;
+
+
+            const nlp =
+                document
+                .getElementById("nlp")
+                .value;
+
+
+            const dataScience =
+                document
+                .getElementById("data_science")
+                .value;
+
+
+            const errorElement =
+                document
+                .getElementById("error");
+
+
+            errorElement.textContent = "";
+
+
+            if (!name) {
+
+                errorElement.textContent =
+                    "Please enter the student's name.";
+
+                return;
+            }
+
+
+            if (
+                python === "" ||
+                ml === "" ||
+                nlp === "" ||
+                dataScience === ""
+            ) {
+
+                errorElement.textContent =
+                    "Please enter marks for all subjects.";
+
+                return;
+            }
+
+
+            const marks = {
+
+                "Python": python,
+
+                "Machine Learning": ml,
+
+                "NLP": nlp,
+
+                "Data Science": dataScience
+
+            };
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/generate",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    name: name,
+
+                                    marks: marks
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    errorElement.textContent =
+                        data.error ||
+                        "Something went wrong.";
+
+                    return;
+                }
+
+
+                /* SHOW RESULT CARD */
+
+                document
+                    .getElementById("resultCard")
+                    .style.display = "block";
+
+
+                /* AVERAGE */
+
+                document
+                    .getElementById("average")
+                    .textContent =
+                    data.average + "%";
+
+
+                /* PERFORMANCE */
+
+                document
+                    .getElementById("performance")
+                    .textContent =
+                    data.performance;
+
+
+                /* SENTIMENT */
+
+                document
+                    .getElementById("sentiment")
+                    .textContent =
+                    data.sentiment;
+
+
+                /* FEEDBACK */
+
+                document
+                    .getElementById("feedback")
+                    .textContent =
+                    data.feedback;
+
+
+                /* STRENGTHS */
+
+                displayList(
+                    "strengths",
+                    data.strengths
+                );
+
+
+                /* IMPROVEMENTS */
+
+                displayList(
+                    "improvements",
+                    data.improvements
+                );
+
+
+                /* RECOMMENDATIONS */
+
+                displayList(
+                    "recommendations",
+                    data.recommendations
+                );
+
+
+                /* SCROLL TO RESULT */
+
+                document
+                    .getElementById("resultCard")
+                    .scrollIntoView({
+                        behavior: "smooth"
+                    });
+
+            }
+
+            catch (error) {
+
+                errorElement.textContent =
+                    "Unable to connect to the server.";
+
+                console.error(error);
+
+            }
+
+        }
+
+
+        function displayList(
+            elementId,
+            items
+        ) {
+
+            const list =
+                document
+                .getElementById(elementId);
+
+
+            list.innerHTML = "";
+
+
+            if (
+                !items ||
+                items.length === 0
+            ) {
+
+                const li =
+                    document.createElement("li");
+
+                li.textContent =
+                    "None";
+
+                list.appendChild(li);
+
+                return;
+            }
+
+
+            items.forEach(
+                function(item) {
+
+                    const li =
+                        document.createElement("li");
+
+                    li.textContent =
+                        item;
+
+                    list.appendChild(li);
+
+                }
+            );
+
+        }
+
+
+        function downloadFeedback() {
+
+            const name =
+                document
+                .getElementById("name")
+                .value;
+
+
+            const average =
+                document
+                .getElementById("average")
+                .textContent;
+
+
+            const performance =
+                document
+                .getElementById("performance")
+                .textContent;
+
+
+            const sentiment =
+                document
+                .getElementById("sentiment")
+                .textContent;
+
+
+            const feedback =
+                document
+                .getElementById("feedback")
+                .textContent;
+
+
+            const strengths =
+                getListText("strengths");
+
+
+            const improvements =
+                getListText("improvements");
+
+
+            const recommendations =
+                getListText("recommendations");
+
+
+            const report =
+
+                "AI PERFORMANCE FEEDBACK REPORT\n" +
+
+                "====================================\n\n" +
+
+                "Student Name: " +
+                name +
+                "\n\n" +
+
+                "Average Score: " +
+                average +
+                "\n" +
+
+                "Performance Level: " +
+                performance +
+                "\n" +
+
+                "Feedback Sentiment: " +
+                sentiment +
+                "\n\n" +
+
+                "PERSONALIZED FEEDBACK\n" +
+                "------------------------------------\n" +
+
+                feedback +
+                "\n\n" +
+
+                "STRENGTHS\n" +
+                "------------------------------------\n" +
+
+                strengths +
+                "\n\n" +
+
+                "AREAS FOR IMPROVEMENT\n" +
+                "------------------------------------\n" +
+
+                improvements +
+                "\n\n" +
+
+                "RECOMMENDATIONS\n" +
+                "------------------------------------\n" +
+
+                recommendations +
+                "\n\n" +
+
+                "Generated by AI Performance Feedback Generator";
+
+
+            const blob =
+                new Blob(
+                    [report],
+                    {
+                        type: "text/plain"
+                    }
+                );
+
+
+            const url =
+                URL.createObjectURL(blob);
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.href = url;
+
+
+            link.download =
+                name.replace(
+                    /\s+/g,
+                    "_"
+                ) +
+                "_Performance_Feedback.txt";
+
+
+            document
+                .body
+                .appendChild(link);
+
+
+            link.click();
+
+
+            document
+                .body
+                .removeChild(link);
+
+
+            URL.revokeObjectURL(url);
+
+        }
+
+
+        function getListText(
+            elementId
+        ) {
+
+            const items =
+                document
+                .getElementById(elementId)
+                .querySelectorAll("li");
+
+
+            let text = "";
+
+
+            items.forEach(
+                function(item) {
+
+                    text +=
+                        "- " +
+                        item.textContent +
+                        "\n";
+
+                }
+            );
+
+
+            return text;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
